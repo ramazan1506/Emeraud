@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Émeraude AI — ИИ-стилист</title>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -21,7 +20,6 @@
   <nav>
     <a href="#about" data-v="about">О нас</a>
     <a href="#home" data-v="home">Главная</a>
-    <a href="#gen" data-v="gen">Сгенерировать образ</a>
     <a href="#chat" data-v="chat">ИИ Консультант</a>
     <a href="#wardrobe" data-v="wardrobe">Мой гардероб</a>
   </nav>
@@ -50,12 +48,14 @@
 <section id="home" class="v">
   <div class="w hero">
     <div class="hx">
-      <h1><span class="ln"><i>Надень</i></span><span class="ln"><i>интеллект</i></span></h1>
-      <p class="lead">Опишите повод, погоду или настроение — ИИ-стилист соберёт образ в духе Maison Margiela, Rick Owens и Prada. Он разговаривает только о моде.</p>
-      <div class="cta"><a class="btn gold" href="#gen">Сгенерировать образ</a><a class="btn" href="#chat">Спросить консультанта</a></div>
+      <h1><span class="ln"><i>Надень</i></span><span class="ln"><i class="gold-word">интеллект</i></span></h1>
+      <p class="lead">Опишите повод, погоду или настроение — ИИ-стилист соберёт образ в вашем духе. Он разговаривает только о моде.</p>
+      <div class="cta"><a class="btn gold" href="#chat">Спросить консультанта</a><a class="btn" href="#wardrobe">Мой гардероб</a></div>
     </div>
     <div class="frame">
-      <div class="art" style="--bgc:#052e22"><svg viewBox="0 0 100 200"><use href="#f1"/></svg></div>
+      <div class="art" style="--bgc:#052e22">
+        <img src="assets/Gemini_Generated_Image_liqqfcliqqfcliqq.jpg" alt="Образ недели" loading="eager">
+      </div>
       <p class="cap">Образ недели: длинное чёрное пальто, изумрудный трикотаж, золотая цепь.</p>
     </div>
   </div>
@@ -85,7 +85,7 @@
   </div></div>
 
   <div class="sec"><div class="w how">
-    <div class="stick"><h2>Как это работает</h2><div class="cta"><a class="btn gold" href="#gen">Попробовать</a></div></div>
+    <div class="stick"><h2>Как это работает</h2><div class="cta"><a class="btn gold" href="#chat">Спросить консультанта</a></div></div>
     <div id="steps"></div>
   </div></div>
 
@@ -93,21 +93,8 @@
 
   <div class="sec"><div class="w faq"><h2>Вопросы и ответы</h2><div id="faq"></div></div></div>
 
-  <div class="sec fin dp"><div class="w"><h2>Соберите первый образ за минуту</h2><div class="cta"><a class="btn gold" href="#gen">Сгенерировать образ</a><a class="btn" href="#wardrobe">Открыть гардероб</a></div></div></div>
+  <div class="sec fin dp"><div class="w"><h2>Подберите образ с ИИ-стилистом</h2><div class="cta"><a class="btn gold" href="#chat">Начать консультацию</a><a class="btn" href="#wardrobe">Открыть гардероб</a></div></div></div>
 </section>
-
-<!-- СГЕНЕРИРОВАТЬ ОБРАЗ -->
-<section id="gen" class="v"><div class="w pg">
-  <h1>Сгенерировать образ</h1>
-  <div class="box app">
-    <aside class="side"><button class="btn gold" id="ng">Новый образ</button><p class="sm">Прошлые запросы</p><div class="hl" id="hl"></div></aside>
-    <div class="mainp">
-      <div class="out" id="out"></div>
-      <div class="chips" id="qc" style="padding:0 14px 12px"></div>
-      <div class="bar"><input id="gi" placeholder="Опишите повод, стиль или погоду" autocomplete="off"><button class="snd" id="gs" aria-label="Отправить"><svg width="22" height="22"><use href="#pl"/></svg></button></div>
-    </div>
-  </div>
-</div></section>
 
 <!-- ИИ КОНСУЛЬТАНТ -->
 <section id="chat" class="v"><div class="w pg">
@@ -140,13 +127,13 @@
 <footer>
   <div class="w fg">
     <div><a class="logo" href="#home">Émeraude<b>AI</b></a><p>ИИ-стилист, который говорит только о моде. Учебный проект, демо-версия.</p></div>
-    <div><h4>Разделы</h4><a href="#about">О нас</a><a href="#gen">Сгенерировать образ</a><a href="#chat">ИИ Консультант</a><a href="#wardrobe">Мой гардероб</a></div>
+    <div><h4>Разделы</h4><a href="#about">О нас</a><a href="#chat">ИИ Консультант</a><a href="#wardrobe">Мой гардероб</a></div>
     <div><h4>Проект</h4><a href="#home">Коллекции</a><a href="#about">Команда</a><a href="#chat">Задать вопрос</a></div>
   </div>
   <div class="w fb"><span>© 2026 Émeraude AI</span><span>Сделано командой студентов</span></div>
 </footer>
 <div id="t" role="status"></div>
 <script src="js/ai.js"></script>
-<script src="js/main.js"></script>
+<script src="js/main.fixed.js"></script>
 </body>
 </html>
