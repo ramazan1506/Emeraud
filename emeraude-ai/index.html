@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Émeraude AI — ИИ-стилист</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#19c48b"/><stop offset=".55" stop-color="#e6cf86"/><stop offset="1" stop-color="#8fd8ff"/></linearGradient>
+<symbol id="f1" viewBox="0 0 100 200"><g fill="url(#hg)"><circle cx="50" cy="20" r="13"/><path d="M34 40c10-6 22-6 32 0l14 58-9 3 2 96H58l-8-72-8 72H27l2-96-9-3z"/></g></symbol>
+<symbol id="f2" viewBox="0 0 100 200"><g fill="url(#hg)"><circle cx="50" cy="20" r="13"/><path d="M38 42c8-5 16-5 24 0l3 30c9 26 15 52 17 80H18c2-28 8-54 17-80z"/><path d="M42 152v44h6v-44zM52 152v44h6v-44z"/></g></symbol>
+<symbol id="f3" viewBox="0 0 100 200"><g fill="url(#hg)"><circle cx="50" cy="20" r="13"/><path d="M28 40h44l14 18-6 54h-9l2 84H57l-7-66-7 66H29l2-84h-9l-6-54z"/></g></symbol>
+<symbol id="pl" viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2-8z" fill="#140f02"/></symbol>
+</defs></svg>
+
+<header class="gl">
+  <a class="logo" href="#home">Émeraude<b>AI</b></a>
+  <nav>
+    <a href="#about" data-v="about">О нас</a>
+    <a href="#home" data-v="home">Главная</a>
+    <a href="#gen" data-v="gen">Сгенерировать образ</a>
+    <a href="#chat" data-v="chat">ИИ Консультант</a>
+    <a href="#wardrobe" data-v="wardrobe">Мой гардероб</a>
+  </nav>
+  <button class="bg" id="bg" aria-label="Меню"><span></span><span></span></button>
+</header>
+
+<main>
+<!-- О НАС -->
+<section id="about" class="v">
+  <div class="w pg">
+    <h1>Мы учим ИИ говорить на языке моды</h1>
+    <div class="two">
+      <p class="lead">Émeraude AI — студенческий стартап о том, как искусственный интеллект может стать личным стилистом для каждого.</p>
+      <div>
+        <p>Выбор одежды — ежедневная задача, которая отнимает время и нервы. Универсальные чат-боты отвечают обо всём подряд, а потому советуют размыто. Наш ИИ настроен строго на моду: он работает с силуэтами, тканями, палитрами и повседневными поводами.</p>
+        <p>Мы делаем сайт и мобильное приложение, где можно описать образ словами, обсудить его с консультантом и собрать цифровой гардероб из собственных вещей. Визуальный язык проекта вдохновлён высокой модой: Maison Margiela, Rick Owens, Prada, Chrome Hearts.</p>
+      </div>
+    </div>
+    <div class="vals" id="vals"></div>
+  </div>
+  <div class="tsec"><div class="w"><h2 style="margin-bottom:56px">Команда проекта</h2><div class="g4" id="team"></div></div></div>
+  <div class="w pg" style="padding-bottom:40px"><h2>Куда мы движемся</h2><div class="road" id="road"></div></div>
+</section>
+
+<!-- ГЛАВНАЯ -->
+<section id="home" class="v">
+  <div class="w hero">
+    <div class="hx">
+      <h1><span class="ln"><i>Надень</i></span><span class="ln"><i>интеллект</i></span></h1>
+      <p class="lead">Опишите повод, погоду или настроение — ИИ-стилист соберёт образ в духе Maison Margiela, Rick Owens и Prada. Он разговаривает только о моде.</p>
+      <div class="cta"><a class="btn gold" href="#gen">Сгенерировать образ</a><a class="btn" href="#chat">Спросить консультанта</a></div>
+    </div>
+    <div class="frame">
+      <div class="art" style="--bgc:#052e22"><svg viewBox="0 0 100 200"><use href="#f1"/></svg></div>
+      <p class="cap">Образ недели: длинное чёрное пальто, изумрудный трикотаж, золотая цепь.</p>
+    </div>
+  </div>
+  <div class="mq" aria-hidden="true"><div id="mq"></div></div>
+
+  <div class="sec"><div class="w">
+    <div class="sh"><h2>Новая коллекция</h2><p>Позиции сезона в духе великих домов. Нажмите на вещь, и ИИ соберёт вокруг неё полный образ.</p></div>
+    <div class="mos" id="new"></div>
+  </div></div>
+
+  <div class="sec" style="padding-top:0"><div class="w">
+    <div class="sh"><h2>Из чего строится образ</h2></div>
+    <div id="cats"></div>
+  </div></div>
+
+  <div class="sec paper"><div class="w man">
+    <h2>Хороший образ отвечает на вопрос: что вы хотите сказать этим днём?</h2>
+    <div>
+      <p>Мы научили ИИ слышать этот вопрос и отвечать на него языком силуэтов, тканей и цвета, а не набором случайных советов.</p>
+      <p>Стилист знает сезонные тенденции, сочетания оттенков и правила пропорций. Вам остаётся описать день и выбрать вариант по душе.</p>
+      <div class="stats">
+        <div><b data-n="5">0</b><span>секунд на подбор образа</span></div>
+        <div><b data-n="24">0</b><span>часа в сутки на связи</span></div>
+        <div><b data-n="100">0</b><span>баллов в оценке Style Score</span></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="sec"><div class="w how">
+    <div class="stick"><h2>Как это работает</h2><div class="cta"><a class="btn gold" href="#gen">Попробовать</a></div></div>
+    <div id="steps"></div>
+  </div></div>
+
+  <div class="sec dp" style="padding-bottom:clamp(60px,8vw,110px)"><div class="w sh"><h2>Образы недели</h2><p>Пролистайте подборку. Каждый образ можно повторить с вещами из своего гардероба.</p></div><div class="track" id="lb"></div></div>
+
+  <div class="sec"><div class="w faq"><h2>Вопросы и ответы</h2><div id="faq"></div></div></div>
+
+  <div class="sec fin dp"><div class="w"><h2>Соберите первый образ за минуту</h2><div class="cta"><a class="btn gold" href="#gen">Сгенерировать образ</a><a class="btn" href="#wardrobe">Открыть гардероб</a></div></div></div>
+</section>
+
+<!-- СГЕНЕРИРОВАТЬ ОБРАЗ -->
+<section id="gen" class="v"><div class="w pg">
+  <h1>Сгенерировать образ</h1>
+  <div class="box app">
+    <aside class="side"><button class="btn gold" id="ng">Новый образ</button><p class="sm">Прошлые запросы</p><div class="hl" id="hl"></div></aside>
+    <div class="mainp">
+      <div class="out" id="out"></div>
+      <div class="chips" id="qc" style="padding:0 14px 12px"></div>
+      <div class="bar"><input id="gi" placeholder="Опишите повод, стиль или погоду" autocomplete="off"><button class="snd" id="gs" aria-label="Отправить"><svg width="22" height="22"><use href="#pl"/></svg></button></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ИИ КОНСУЛЬТАНТ -->
+<section id="chat" class="v"><div class="w pg">
+  <h1>ИИ Консультант</h1>
+  <div class="box chat">
+    <div class="ch"><div class="av">É</div><div><b>Stylist AI</b><small>в сети, отвечает только о моде</small></div></div>
+    <div class="msgs" id="ms"></div>
+    <div class="chips" id="cq" style="padding:0 14px 12px"></div>
+    <div class="bar"><input id="ci" placeholder="Напишите сообщение" autocomplete="off"><button class="snd" id="cs" aria-label="Отправить"><svg width="22" height="22"><use href="#pl"/></svg></button></div>
+  </div>
+</div></section>
+
+<!-- МОЙ ГАРДЕРОБ -->
+<section id="wardrobe" class="v"><div class="w pg">
+  <h1>Мой гардероб</h1>
+  <p class="lead" style="margin-bottom:34px">Добавляйте вещи с фото: карточка подстроится под любой размер снимка. Файл можно перетащить прямо на панель.</p>
+  <div class="box wf">
+    <input type="text" id="wn" placeholder="Название вещи, например «Чёрный бомбер»" aria-label="Название вещи">
+    <select id="wc" aria-label="Категория"><option>Верх</option><option>Низ</option><option>Обувь</option><option>Аксессуары</option></select>
+    <label class="up"><input type="file" id="wfile" accept="image/*"><img id="prev" alt="" hidden><span id="ut">Загрузить фото</span></label>
+    <button class="btn gold" id="wa">Добавить</button>
+    <button class="btn" id="wm">Собрать образ</button>
+  </div>
+  <div id="wr"></div>
+  <div class="chips" id="wf2" style="margin-bottom:26px"></div>
+  <div class="wg" id="wg"></div>
+</div></section>
+</main>
+
+<footer>
+  <div class="w fg">
+    <div><a class="logo" href="#home">Émeraude<b>AI</b></a><p>ИИ-стилист, который говорит только о моде. Учебный проект, демо-версия.</p></div>
+    <div><h4>Разделы</h4><a href="#about">О нас</a><a href="#gen">Сгенерировать образ</a><a href="#chat">ИИ Консультант</a><a href="#wardrobe">Мой гардероб</a></div>
+    <div><h4>Проект</h4><a href="#home">Коллекции</a><a href="#about">Команда</a><a href="#chat">Задать вопрос</a></div>
+  </div>
+  <div class="w fb"><span>© 2026 Émeraude AI</span><span>Сделано командой студентов</span></div>
+</footer>
+<div id="t" role="status"></div>
+<script src="js/ai.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
