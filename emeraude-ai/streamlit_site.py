@@ -45,8 +45,35 @@ STREAMLIT_BRIDGE = r"""
     else request.resolve(response.result);
   });
 
+    let heightFrame = 0;
+    const updateHeight = () => {
+        cancelAnimationFrame(heightFrame);
+        heightFrame = requestAnimationFrame(() => {
+            const height = Math.ceil(Math.max(
+                document.documentElement.scrollHeight,
+                document.body.scrollHeight,
+                document.documentElement.getBoundingClientRect().height,
+                document.body.getBoundingClientRect().height
+            ));
+            send("streamlit:setFrameHeight", {height});
+        });
+    };
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(document.documentElement);
+    resizeObserver.observe(document.body);
+    const mutationObserver = new MutationObserver(updateHeight);
+    mutationObserver.observe(document.documentElement, {
+        attributes: true,
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
+    window.addEventListener("load", updateHeight);
+    window.addEventListener("resize", updateHeight);
+    window.addEventListener("hashchange", updateHeight);
+
   send("streamlit:componentReady", {apiVersion: 1});
-  send("streamlit:setFrameHeight", {height: 1000});
+    updateHeight();
 })();
 """
 
