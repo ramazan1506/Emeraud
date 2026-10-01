@@ -17,23 +17,13 @@ const list = (a, f) => Array.isArray(a) ? a.map(f).join('') : '';
 document.addEventListener('DOMContentLoaded', () => {
   const V = ['about','home','chat','wardrobe','auth'];
   const cnt = el => { const n = +el.dataset.n, t0 = performance.now(); (function f(t) { const p = Math.min((t - t0) / 1400, 1); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f) })(t0) };
-  const revealElement = el => {
-    if (el.dataset.n) {
-      if (el.dataset.counted) return;
-      el.dataset.counted = 'true';
-      cnt(el);
-    } else {
-      el.classList.add('in');
-    }
-  };
-  window.__emeraudeRevealElement = revealElement;
   let io;
   const safeIo = () => {
     if (io) return io;
     io = new IntersectionObserver(es => es.forEach(e => {
       if (!e.isIntersecting) return;
       const t = e.target;
-      revealElement(t);
+      t.dataset.n ? cnt(t) : t.classList.add('in');
       io.unobserve(t);
     }), {threshold: .15});
     return io;
@@ -52,9 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $$('nav a').forEach(a => a.classList.toggle('act', a.dataset.v === v));
     document.body.classList.remove('menu');
     scrollTo(0, 0);
-    if (!window.__EMERAUDE_STREAMLIT__) {
-      $$('.rvc:not(.in),[data-n]:not([data-counted])').forEach(el => safeIo().observe(el));
-    }
+    $$('.rvc:not(.in),[data-n]').forEach(el => safeIo().observe(el));
   }
 
   addEventListener('scroll', () => document.documentElement.style.setProperty('--sy', scrollY), {passive: true});
@@ -62,8 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const mq = $('#mq'); if (mq) mq.innerHTML = 'Maison Margiela,Rick Owens,Prada,Chrome Hearts,Yohji Yamamoto,Ann Demeulemeester'.split(',').map(b => `<span>${b}</span>`).join('').repeat(3);
   const newWrap = $('#new'); if (newWrap) newWrap.innerHTML = list([
     ['Jasonwood','Осеннее пальто','assets/1790775475607.jpg'],
-    ['Maison Margiela','Изумрудная водолазка','assets/emerald-turtleneck.png'],
-    ['Tiffany & Co.','Золотая цепь','assets/gold-chain.png']
+    ['Maison Margiela','Изумрудная водолазка','assets/Снимок экрана 2026-09-30 191733.png'],
+    ['Tiffany & Co.','Золотая цепь','assets/Снимок экрана 2026-09-30 191859.png']
   ],
     ([b, t, img], i) => `<a class="pc" href="#chat" style="--reveal-delay:${i * 100}ms" data-p="Образ с вещью «${t}» в духе ${b}">${art(i, '', img)}<small>в духе ${b}</small><h3>${t}</h3></a>`);
   const revealImage = img => requestAnimationFrame(() => img.classList.add('is-loaded'));
@@ -84,11 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (r.top < innerHeight * .9 && r.bottom > 0) target.classList.add('is-visible');
     });
   };
-  if (!window.__EMERAUDE_STREAMLIT__) {
-    addEventListener('scroll', revealHomeTargets, {passive: true});
-    addEventListener('resize', revealHomeTargets);
-    revealHomeTargets();
-  }
+  addEventListener('scroll', revealHomeTargets, {passive: true});
+  addEventListener('resize', revealHomeTargets);
+  revealHomeTargets();
   const cats = $('#cats'); if (cats) cats.innerHTML = list([['Верхняя одежда','Пальто, парки, кожаные куртки'],['Трикотаж','Водолазки, кардиганы, худи'],['Обувь','Лоферы, челси, кроссовки'],['Аксессуары','Ремни, цепи, сумки']],
     ([t, d]) => `<a class="cr" href="#chat" data-p="Образ на основе категории «${t}»"><h3>${t}</h3><p>${d}</p></a>`);
   const steps = $('#steps'); if (steps) steps.innerHTML = list([['Опишите запрос','Напишите, куда идёте, какая погода и что вам нравится: «ужин в ресторане, прохладный вечер, люблю тёмные цвета».'],['ИИ анализирует','Модель работает строго в контексте моды: учитывает повод, сезон, силуэты, палитру и ваши предпочтения.'],['Получите образ','Полный лук: верх, низ, обувь и аксессуары, цветовая палитра и оценка стиля от 0 до 100.'],['Поделитесь и сохраните','Отправьте образ друзьям, ведите историю запросов и собирайте новые сочетания из своего гардероба.']],

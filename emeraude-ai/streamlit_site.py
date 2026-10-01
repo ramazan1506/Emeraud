@@ -18,7 +18,6 @@ SYSTEM_INSTRUCTION = (
 )
 STREAMLIT_BRIDGE = r"""
 (() => {
-    window.__EMERAUDE_STREAMLIT__ = true;
   const pending = new Map();
   const send = (type, payload = {}) => window.parent.postMessage({
     isStreamlitMessage: true,
@@ -46,52 +45,9 @@ STREAMLIT_BRIDGE = r"""
     else request.resolve(response.result);
   });
 
-    const getParentScroller = () => {
-        try {
-            const parentDocument = window.parent.document;
-            let ancestor = window.frameElement?.parentElement;
-            while (ancestor && ancestor !== parentDocument.body && ancestor !== parentDocument.documentElement) {
-                const overflowY = window.parent.getComputedStyle(ancestor).overflowY;
-                if ((overflowY === "auto" || overflowY === "scroll") && ancestor.scrollHeight > ancestor.clientHeight + 1) {
-                    return ancestor;
-                }
-                ancestor = ancestor.parentElement;
-            }
-            const streamlitMain = parentDocument.querySelector('[data-testid="stMain"]');
-            if (streamlitMain && streamlitMain.scrollHeight > streamlitMain.clientHeight + 1) return streamlitMain;
-            const root = parentDocument.scrollingElement || parentDocument.documentElement;
-            return root.scrollHeight > root.clientHeight ? root : null;
-        } catch (_) {
-            return null;
-        }
-    };
-    const scrollParentBy = (deltaX, deltaY) => {
-        const scroller = getParentScroller();
-        if (scroller) {
-            scroller.scrollBy({left: deltaX, top: deltaY, behavior: "auto"});
-            return true;
-        }
-        try {
-            window.parent.scrollBy(deltaX, deltaY);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    };
-    const scrollParentToTop = () => {
-        const scroller = getParentScroller();
-        if (scroller) {
-            scroller.scrollTo({top: 0, behavior: "smooth"});
-            return;
-        }
-        try { window.parent.scrollTo(0, 0); } catch (_) {}
-    };
     const getViewportHeight = () => {
         let height = 900;
-        try {
-            const scroller = getParentScroller();
-            height = scroller?.clientHeight || window.parent.innerHeight || height;
-        } catch (_) {}
+        try { height = window.parent.innerHeight || height; } catch (_) {}
         return Math.max(480, Math.min(height, 1000));
     };
     let heightFrame = 0;
@@ -115,77 +71,37 @@ STREAMLIT_BRIDGE = r"""
         try {
             const frameTop = window.frameElement.getBoundingClientRect().top;
             const viewportHeight = window.parent.innerHeight;
-            document.querySelectorAll("#home .scroll-reveal:not(.is-visible), .rvc:not(.in), [data-n]:not([data-counted])").forEach(element => {
+            document.querySelectorAll("#home .scroll-reveal:not(.is-visible)").forEach(element => {
                 const bounds = element.getBoundingClientRect();
                 if (frameTop + bounds.top < viewportHeight * 0.9 && frameTop + bounds.bottom > 0) {
-                    if (element.matches("#home .scroll-reveal")) element.classList.add("is-visible");
-                    if (typeof window.__emeraudeRevealElement === "function") {
-                        window.__emeraudeRevealElement(element);
-                    } else {
-                        element.classList.add("in");
-                    }
+                    element.classList.add("is-visible");
+                }
+            });
+            document.querySelectorAll(".rvc:not(.in)").forEach(element => {
+                const bounds = element.getBoundingClientRect();
+                if (frameTop + bounds.top < viewportHeight && frameTop + bounds.bottom > 0) {
+                    element.classList.add("in");
                 }
             });
         } catch (_) {}
     };
     const resizeObserver = new ResizeObserver(updateHeight);
     resizeObserver.observe(document.documentElement);
-    let scrollSyncFrame = 0;
-    const syncParentScroll = () => {
-        if (scrollSyncFrame) return;
-        scrollSyncFrame = requestAnimationFrame(() => {
-            scrollSyncFrame = 0;
-            try {
-                const scroller = getParentScroller();
-                const scrollTop = scroller ? scroller.scrollTop : (window.parent.scrollY || 0);
-                document.documentElement.style.setProperty("--sy", scrollTop);
-                revealParentViewport();
-            } catch (_) {}
+    resizeObserver.observe(document.body);
+    const revealStreamlitContent = () => {
+        requestAnimationFrame(() => {
+            document.querySelectorAll("#home .scroll-reveal:not(.is-visible)").forEach(element => {
+                element.classList.add("is-visible");
+            });
+            document.querySelectorAll(".rvc:not(.in)").forEach(element => {
+                element.classList.add("in");
+            });
         });
     };
-    const listenedScrollTargets = new WeakSet();
-    const bindParentScrollListeners = () => {
-        try {
-            const parentDocument = window.parent.document;
-            const listen = target => {
-                if (!target || listenedScrollTargets.has(target)) return;
-                target.addEventListener("scroll", syncParentScroll, {passive: true});
-                listenedScrollTargets.add(target);
-            };
-            let ancestor = window.frameElement?.parentElement;
-            while (ancestor && ancestor !== parentDocument.documentElement) {
-                const overflowY = window.parent.getComputedStyle(ancestor).overflowY;
-                if (overflowY === "auto" || overflowY === "scroll") listen(ancestor);
-                ancestor = ancestor.parentElement;
-            }
-            listen(parentDocument);
-            listen(window.parent);
-        } catch (_) {}
-    };
-    try {
-        const parentObserver = new MutationObserver(bindParentScrollListeners);
-        parentObserver.observe(window.parent.document.body, {childList: true, subtree: true});
-    } catch (_) {}
-    document.addEventListener("wheel", event => {
-        const track = event.target.closest?.(".track");
-        if (track) {
-            const maxScroll = track.scrollWidth - track.clientWidth;
-            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-            const atStart = track.scrollLeft <= 0 && delta < 0;
-            const atEnd = track.scrollLeft >= maxScroll - 1 && delta > 0;
-            if (maxScroll > 0 && !atStart && !atEnd) {
-                track.scrollBy({left: delta, behavior: "smooth"});
-                event.preventDefault();
-                return;
-            }
-        }
-        const forwarded = scrollParentBy(event.deltaX, event.deltaY);
-        if (forwarded) event.preventDefault();
-    }, {passive: false});
-    resizeObserver.observe(document.body);
     const mutationObserver = new MutationObserver(() => {
         updateHeight();
         revealParentViewport();
+        revealStreamlitContent();
     });
     mutationObserver.observe(document.body, {
         attributes: true,
@@ -198,15 +114,13 @@ STREAMLIT_BRIDGE = r"""
     document.addEventListener("load", updateHeight, true);
     document.fonts?.ready.then(updateHeight);
     window.addEventListener("resize", updateHeight);
-    bindParentScrollListeners();
+    try { window.parent.addEventListener("scroll", revealParentViewport, {passive: true}); } catch (_) {}
     window.addEventListener("hashchange", () => {
         updateHeight();
-        scrollParentToTop();
-        requestAnimationFrame(bindParentScrollListeners);
+        try { window.parent.scrollTo(0, 0); } catch (_) {}
         requestAnimationFrame(revealParentViewport);
     });
   send("streamlit:componentReady", {apiVersion: 1});
-    syncParentScroll();
     updateHeight();
 })();
 """
