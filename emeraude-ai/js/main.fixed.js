@@ -38,13 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function show() {
     let v = location.hash.slice(1);
     if (!V.includes(v)) v = 'home';
-    const authenticated = Boolean(ls('ea_auth_user', null));
-    if (!authenticated && v !== 'auth') {
-      if (location.hash !== '#auth') location.hash = '#auth';
-      v = 'auth';
-    }
     V.forEach(x => { const el = $('#' + x); if (el) el.classList.toggle('on', x === v); });
-    $$('nav a[data-v]:not([data-v="auth"])').forEach(a => { a.hidden = !authenticated; });
     $$('nav a').forEach(a => a.classList.toggle('act', a.dataset.v === v));
     document.body.classList.remove('menu');
     scrollTo(0, 0);
