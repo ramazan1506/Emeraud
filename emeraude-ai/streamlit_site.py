@@ -138,6 +138,25 @@ STREAMLIT_BRIDGE = r"""
             revealParentViewport();
         } catch (_) {}
     };
+    const listenedScrollTargets = new WeakSet();
+    const bindParentScrollListeners = () => {
+        try {
+            const parentDocument = window.parent.document;
+            const listen = target => {
+                if (!target || listenedScrollTargets.has(target)) return;
+                target.addEventListener("scroll", syncParentScroll, {passive: true});
+                listenedScrollTargets.add(target);
+            };
+            let ancestor = window.frameElement?.parentElement;
+            while (ancestor && ancestor !== parentDocument.documentElement) {
+                const overflowY = window.parent.getComputedStyle(ancestor).overflowY;
+                if (overflowY === "auto" || overflowY === "scroll") listen(ancestor);
+                ancestor = ancestor.parentElement;
+            }
+            listen(parentDocument);
+            listen(window.parent);
+        } catch (_) {}
+    };
     document.addEventListener("wheel", event => {
         const track = event.target.closest?.(".track");
         if (track) {
@@ -181,13 +200,11 @@ STREAMLIT_BRIDGE = r"""
     document.addEventListener("load", updateHeight, true);
     document.fonts?.ready.then(updateHeight);
     window.addEventListener("resize", updateHeight);
-    try {
-        window.parent.document.addEventListener("scroll", syncParentScroll, {passive: true, capture: true});
-        window.parent.addEventListener("scroll", syncParentScroll, {passive: true});
-    } catch (_) {}
+    bindParentScrollListeners();
     window.addEventListener("hashchange", () => {
         updateHeight();
         scrollParentToTop();
+        requestAnimationFrame(bindParentScrollListeners);
         requestAnimationFrame(revealParentViewport);
     });
   send("streamlit:componentReady", {apiVersion: 1});
