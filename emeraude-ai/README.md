@@ -1,5 +1,21 @@
 # Émeraude AI
 
+## Запуск на Streamlit Community Cloud
+
+Для Streamlit Cloud используется приложение `streamlit_app.py` с теми же разделами сайта и Gemini-консультантом. В Streamlit Cloud создайте приложение из GitHub-репозитория и задайте:
+
+- **Main file path:** `emeraude-ai/streamlit_app.py`
+- **Secrets** в настройках приложения:
+
+   ```toml
+   GEMINI_API_KEY = "ваш_ключ_из_Google_AI_Studio"
+   GEMINI_MODEL = "gemini-3.5-flash-lite"
+   ```
+
+Затем нажмите **Deploy**. Зависимости Streamlit Cloud установит из `emeraude-ai/requirements.txt`. Не публикуйте API-ключ в исходном коде или GitHub.
+
+Этот вариант использует интерфейс Streamlit. Исходная HTML/Node-версия запускается отдельно по инструкциям ниже.
+
 ## Локальный запуск с Gemini
 
 1. Установите Node.js 20 или новее.

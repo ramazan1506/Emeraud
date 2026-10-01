@@ -4,7 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
-const HOST = '127.0.0.1';
+const HOST = '0.0.0.0';
 const MAX_BODY_BYTES = 16_000;
 const SYSTEM_INSTRUCTION = 'Ты — ИИ-стилист Émeraude AI. Отвечай только о моде, одежде, обуви, аксессуарах и стиле. Если вопрос не о моде, вежливо откажись и предложи вернуться к теме стиля. Отвечай по-русски, конкретно и доброжелательно.';
 
@@ -187,4 +187,4 @@ const server = createServer(async (request, response) => {
 });
 
 const port = Number(process.env.PORT) || 3000;
-server.listen(port, HOST, () => console.log(`Émeraude AI доступен: http://${HOST}:${port}`));
+server.listen(port, HOST, () => console.log(`Émeraude AI слушает порт ${port}`));
