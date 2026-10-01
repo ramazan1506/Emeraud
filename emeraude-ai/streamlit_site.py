@@ -69,8 +69,15 @@ STREAMLIT_BRIDGE = r"""
         subtree: true
     });
     window.addEventListener("load", updateHeight);
+    document.addEventListener("load", updateHeight, true);
     window.addEventListener("resize", updateHeight);
-    window.addEventListener("hashchange", updateHeight);
+    window.addEventListener("hashchange", () => {
+        updateHeight();
+        try {
+            window.parent.scrollTo(0, 0);
+        } catch (_) {}
+    });
+    if (document.fonts?.ready) document.fonts.ready.then(updateHeight);
 
   send("streamlit:componentReady", {apiVersion: 1});
     updateHeight();
@@ -192,6 +199,14 @@ def get_site_component():
         '<link rel="stylesheet" href="css/style.css">',
         fonts + '<link rel="stylesheet" href="css/style.css">',
     )
+        html = html.replace(
+                "</head>",
+                """<style>
+                #home .scroll-reveal,
+                #home .scroll-reveal.is-visible {opacity:1!important;transform:none!important}
+                .rvc {clip-path:none!important}
+                </style></head>""",
+        )
     html = html.replace(
         '<script src="js/ai.js"></script>',
         f"<script>{STREAMLIT_BRIDGE}</script><script src=\"js/ai.js\"></script>",
