@@ -45,9 +45,46 @@ STREAMLIT_BRIDGE = r"""
     else request.resolve(response.result);
   });
 
+    const getParentScroller = () => {
+        try {
+            const parentDocument = window.parent.document;
+            const streamlitContainer = parentDocument.querySelector('[data-testid="stAppViewContainer"]');
+            if (streamlitContainer && streamlitContainer.scrollHeight > streamlitContainer.clientHeight) {
+                return streamlitContainer;
+            }
+            const root = parentDocument.scrollingElement || parentDocument.documentElement;
+            return root.scrollHeight > root.clientHeight ? root : null;
+        } catch (_) {
+            return null;
+        }
+    };
+    const scrollParentBy = (deltaX, deltaY) => {
+        const scroller = getParentScroller();
+        if (scroller) {
+            scroller.scrollBy({left: deltaX, top: deltaY, behavior: "auto"});
+            return true;
+        }
+        try {
+            window.parent.scrollBy(deltaX, deltaY);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    };
+    const scrollParentToTop = () => {
+        const scroller = getParentScroller();
+        if (scroller) {
+            scroller.scrollTo({top: 0, behavior: "smooth"});
+            return;
+        }
+        try { window.parent.scrollTo(0, 0); } catch (_) {}
+    };
     const getViewportHeight = () => {
         let height = 900;
-        try { height = window.parent.innerHeight || height; } catch (_) {}
+        try {
+            const scroller = getParentScroller();
+            height = scroller?.clientHeight || window.parent.innerHeight || height;
+        } catch (_) {}
         return Math.max(480, Math.min(height, 1000));
     };
     let heightFrame = 0;
@@ -89,7 +126,8 @@ STREAMLIT_BRIDGE = r"""
     resizeObserver.observe(document.documentElement);
     const syncParentScroll = () => {
         try {
-            const scrollTop = window.parent.scrollY || window.parent.document.documentElement.scrollTop || 0;
+            const scroller = getParentScroller();
+            const scrollTop = scroller?.scrollTop || window.parent.scrollY || 0;
             document.documentElement.style.setProperty("--sy", scrollTop);
             revealParentViewport();
         } catch (_) {}
@@ -107,11 +145,7 @@ STREAMLIT_BRIDGE = r"""
                 return;
             }
         }
-        let forwarded = false;
-        try {
-            window.parent.scrollBy(event.deltaX, event.deltaY);
-            forwarded = true;
-        } catch (_) {}
+        const forwarded = scrollParentBy(event.deltaX, event.deltaY);
         if (forwarded) event.preventDefault();
     }, {passive: false});
     resizeObserver.observe(document.body);
@@ -141,10 +175,12 @@ STREAMLIT_BRIDGE = r"""
     document.addEventListener("load", updateHeight, true);
     document.fonts?.ready.then(updateHeight);
     window.addEventListener("resize", updateHeight);
+    const parentScroller = getParentScroller();
+    if (parentScroller) parentScroller.addEventListener("scroll", syncParentScroll, {passive: true});
     try { window.parent.addEventListener("scroll", syncParentScroll, {passive: true}); } catch (_) {}
     window.addEventListener("hashchange", () => {
         updateHeight();
-        try { window.parent.scrollTo(0, 0); } catch (_) {}
+        scrollParentToTop();
         requestAnimationFrame(revealParentViewport);
     });
   send("streamlit:componentReady", {apiVersion: 1});
