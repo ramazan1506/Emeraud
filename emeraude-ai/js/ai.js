@@ -1,5 +1,11 @@
 /* Запросы идут через локальный сервер, API-ключ браузеру не передаётся. */
 async function askAI(q, mode) {
+  if (typeof window.__emeraudeStreamlitRequest === 'function') {
+    const data = await window.__emeraudeStreamlitRequest(q, mode);
+    if (mode === 'look') return {...data, q};
+    if (typeof data.text !== 'string') throw new Error('ИИ вернул ответ в неизвестном формате.');
+    return data.text;
+  }
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},

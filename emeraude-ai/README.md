@@ -2,9 +2,9 @@
 
 ## Запуск на Streamlit Community Cloud
 
-Для Streamlit Cloud используется приложение `streamlit_app.py` с теми же разделами сайта и Gemini-консультантом. В Streamlit Cloud создайте приложение из GitHub-репозитория и задайте:
+Для Streamlit Cloud используется `code.py`: он открывает исходный сайт с его HTML, CSS, анимациями и навигацией, а запросы Gemini безопасно передаются Python-серверу. Создайте приложение из GitHub-репозитория и задайте:
 
-- **Main file path:** `emeraude-ai/streamlit_app.py`
+- **Main file path:** `emeraude-ai/code.py`
 - **Secrets** в настройках приложения:
 
    ```toml
@@ -14,7 +14,7 @@
 
 Затем нажмите **Deploy**. Зависимости Streamlit Cloud установит из `emeraude-ai/requirements.txt`. Не публикуйте API-ключ в исходном коде или GitHub.
 
-Этот вариант использует интерфейс Streamlit. Исходная HTML/Node-версия запускается отдельно по инструкциям ниже.
+Не выбирайте `streamlit_app.py`, если нужен исходный дизайн сайта: это отдельный упрощённый интерфейс. Исходная HTML/Node-версия запускается отдельно по инструкциям ниже.
 
 ## Локальный запуск с Gemini
 
