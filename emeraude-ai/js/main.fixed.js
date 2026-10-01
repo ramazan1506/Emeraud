@@ -6,17 +6,11 @@ const ls = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d } c
 const sv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return 1 } catch (e) { return 0 } };
 const toast = m => { const t = $('#t'); if (!t) return; t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2600) };
 const BG = ['#052e22','#0b6b4c','#1a1a1a','#3a2e0e','#e9e6da'];
-const FALLBACK_IMAGES = [
-  'assets/fashion-1.svg',
-  'assets/fashion-2.svg',
-  'assets/fashion-3.svg',
-  'assets/fashion-4.svg',
-  'assets/fashion-5.svg',
-  'assets/fashion-6.svg'
-];
 const art = (i, x = '', src = '') => {
-  const photo = src || FALLBACK_IMAGES[i % FALLBACK_IMAGES.length];
-  return `<div class="art ${x}" style="--bgc:${BG[i % 5]}"><img src="${photo}" alt="" loading="lazy"></div>`;
+  const visual = src
+    ? `<img src="${encodeURI(src)}" alt="" loading="lazy">`
+    : `<svg viewBox="0 0 100 200"><use href="#f${i % 3 + 1}"/></svg>`;
+  return `<div class="art ${x}" style="--bgc:${BG[i % 5]}">${visual}</div>`;
 };
 const list = (a, f) => Array.isArray(a) ? a.map(f).join('') : '';
 
@@ -38,7 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function show() {
     let v = location.hash.slice(1);
     if (!V.includes(v)) v = 'home';
+    const authenticated = Boolean(ls('ea_auth_user', null));
+    if (!authenticated && v !== 'auth') {
+      v = 'auth';
+      history.replaceState(null, '', '#auth');
+    }
     V.forEach(x => { const el = $('#' + x); if (el) el.classList.toggle('on', x === v); });
+    $$('nav a[data-v]:not([data-v="auth"])').forEach(a => { a.hidden = !authenticated; });
     $$('nav a').forEach(a => a.classList.toggle('act', a.dataset.v === v));
     document.body.classList.remove('menu');
     scrollTo(0, 0);
@@ -197,11 +197,30 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAuthNav();
 
   const CT = ['Все','Верх','Низ','Обувь','Аксессуары'];
-  let W = ls('ea_w', [{n:'Чёрное пальто оверсайз',c:'Верх'},{n:'Изумрудная водолазка',c:'Верх'},{n:'Брюки цвета графит',c:'Низ'},{n:'Челси на массивной подошве',c:'Обувь'},{n:'Золотая цепь',c:'Аксессуары'},{n:'Кожаный ремень',c:'Аксессуары'}]), F = 'Все', pend = null;
+  const sampleWardrobe = [
+    ['Чёрное пальто оверсайз', 'Верх'],
+    ['Изумрудная водолазка', 'Верх'],
+    ['Брюки цвета графит', 'Низ'],
+    ['Челси на массивной подошве', 'Обувь'],
+    ['Золотая цепь', 'Аксессуары'],
+    ['Кожаный ремень', 'Аксессуары']
+  ];
+  const savedWardrobe = ls('ea_w', []);
+  const wardrobeItems = Array.isArray(savedWardrobe) ? savedWardrobe.filter(item => item && typeof item === 'object') : [];
+  let W = wardrobeItems.filter(item => item.img || !sampleWardrobe.some(([name, category]) => item.n === name && item.c === category)), F = 'Все', pend = null;
+  if (W.length !== wardrobeItems.length) sv('ea_w', W);
 
   function rw() {
-    const wf2 = $('#wf2'); if (wf2) wf2.innerHTML = list(CT, c => `<button class="chip${c === F ? ' on' : ''}" data-c="${c}">${c}</button>`);
-    const wg = $('#wg'); if (wg) wg.innerHTML = list(W.map((w, i) => [w, i]).filter(([w]) => F === 'Все' || w.c === F), ([w, i]) => `<figure class="wi">${w.img ? `<img src="${w.img}" alt="${esc(w.n)}">` : art(CT.indexOf(w.c) + 1)}<button class="x" data-i="${i}" aria-label="Удалить">✕</button><figcaption><small>${w.c}</small><b>${esc(w.n)}</b></figcaption></figure>`);
+    const wf2 = $('#wf2');
+    if (wf2) {
+      wf2.hidden = !W.length;
+      wf2.innerHTML = list(CT, c => `<button class="chip${c === F ? ' on' : ''}" data-c="${c}">${c}</button>`);
+    }
+    const wg = $('#wg');
+    if (wg) {
+      const cards = list(W.map((w, i) => [w, i]).filter(([w]) => F === 'Все' || w.c === F), ([w, i]) => `<figure class="wi">${w.img ? `<img src="${w.img}" alt="${esc(w.n)}">` : art(CT.indexOf(w.c) + 1)}<button class="x" data-i="${i}" aria-label="Удалить">✕</button><figcaption><small>${w.c}</small><b>${esc(w.n)}</b></figcaption></figure>`);
+      wg.innerHTML = cards || '<p style="color:var(--mut);padding:18px 0">Гардероб пока пуст.</p>';
+    }
   }
 
   function pick(f) {

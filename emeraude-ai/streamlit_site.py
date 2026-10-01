@@ -88,11 +88,28 @@ STREAMLIT_BRIDGE = r"""
     const resizeObserver = new ResizeObserver(updateHeight);
     resizeObserver.observe(document.documentElement);
     resizeObserver.observe(document.body);
+    const revealStreamlitContent = () => {
+        requestAnimationFrame(() => {
+            document.querySelectorAll("#home .scroll-reveal:not(.is-visible)").forEach(element => {
+                element.classList.add("is-visible");
+            });
+            document.querySelectorAll(".rvc:not(.in)").forEach(element => {
+                element.classList.add("in");
+            });
+        });
+    };
     const mutationObserver = new MutationObserver(() => {
         updateHeight();
         revealParentViewport();
+        revealStreamlitContent();
     });
-    mutationObserver.observe(document.body, {childList: true, characterData: true, subtree: true});
+    mutationObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"],
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
     window.addEventListener("load", updateHeight);
     document.addEventListener("load", updateHeight, true);
     document.fonts?.ready.then(updateHeight);
