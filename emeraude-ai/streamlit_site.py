@@ -87,6 +87,33 @@ STREAMLIT_BRIDGE = r"""
     };
     const resizeObserver = new ResizeObserver(updateHeight);
     resizeObserver.observe(document.documentElement);
+    const syncParentScroll = () => {
+        try {
+            const scrollTop = window.parent.scrollY || window.parent.document.documentElement.scrollTop || 0;
+            document.documentElement.style.setProperty("--sy", scrollTop);
+            revealParentViewport();
+        } catch (_) {}
+    };
+    document.addEventListener("wheel", event => {
+        const track = event.target.closest?.(".track");
+        if (track) {
+            const maxScroll = track.scrollWidth - track.clientWidth;
+            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+            const atStart = track.scrollLeft <= 0 && delta < 0;
+            const atEnd = track.scrollLeft >= maxScroll - 1 && delta > 0;
+            if (maxScroll > 0 && !atStart && !atEnd) {
+                track.scrollBy({left: delta, behavior: "smooth"});
+                event.preventDefault();
+                return;
+            }
+        }
+        let forwarded = false;
+        try {
+            window.parent.scrollBy(event.deltaX, event.deltaY);
+            forwarded = true;
+        } catch (_) {}
+        if (forwarded) event.preventDefault();
+    }, {passive: false});
     resizeObserver.observe(document.body);
     const revealStreamlitContent = () => {
         requestAnimationFrame(() => {
@@ -114,13 +141,14 @@ STREAMLIT_BRIDGE = r"""
     document.addEventListener("load", updateHeight, true);
     document.fonts?.ready.then(updateHeight);
     window.addEventListener("resize", updateHeight);
-    try { window.parent.addEventListener("scroll", revealParentViewport, {passive: true}); } catch (_) {}
+    try { window.parent.addEventListener("scroll", syncParentScroll, {passive: true}); } catch (_) {}
     window.addEventListener("hashchange", () => {
         updateHeight();
         try { window.parent.scrollTo(0, 0); } catch (_) {}
         requestAnimationFrame(revealParentViewport);
     });
   send("streamlit:componentReady", {apiVersion: 1});
+    syncParentScroll();
     updateHeight();
 })();
 """
