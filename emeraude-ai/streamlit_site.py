@@ -45,19 +45,63 @@ STREAMLIT_BRIDGE = r"""
     else request.resolve(response.result);
   });
 
-    const updateHeight = () => {
+    const getViewportHeight = () => {
         let height = 900;
-        try {
-            height = window.parent.innerHeight || height;
-        } catch (_) {}
-        send("streamlit:setFrameHeight", {height: Math.max(480, Math.min(height, 1000))});
+        try { height = window.parent.innerHeight || height; } catch (_) {}
+        return Math.max(480, Math.min(height, 1000));
     };
+    let heightFrame = 0;
+    const updateHeight = () => {
+        cancelAnimationFrame(heightFrame);
+        heightFrame = requestAnimationFrame(() => {
+            const viewportHeight = getViewportHeight();
+            const root = document.documentElement;
+            root.style.setProperty("--streamlit-100vh", `${viewportHeight}px`);
+            root.style.setProperty("--streamlit-78vh", `${viewportHeight * 0.78}px`);
+            root.style.setProperty("--streamlit-70vh", `${viewportHeight * 0.7}px`);
+            root.style.setProperty("--streamlit-62vh", `${viewportHeight * 0.62}px`);
+            const contentHeight = Math.ceil(Math.max(
+                document.body.scrollHeight,
+                document.body.offsetHeight
+            ));
+            send("streamlit:setFrameHeight", {height: Math.max(viewportHeight, contentHeight)});
+        });
+    };
+    const revealParentViewport = () => {
+        try {
+            const frameTop = window.frameElement.getBoundingClientRect().top;
+            const viewportHeight = window.parent.innerHeight;
+            document.querySelectorAll("#home .scroll-reveal:not(.is-visible)").forEach(element => {
+                const bounds = element.getBoundingClientRect();
+                if (frameTop + bounds.top < viewportHeight * 0.9 && frameTop + bounds.bottom > 0) {
+                    element.classList.add("is-visible");
+                }
+            });
+            document.querySelectorAll(".rvc:not(.in)").forEach(element => {
+                const bounds = element.getBoundingClientRect();
+                if (frameTop + bounds.top < viewportHeight && frameTop + bounds.bottom > 0) {
+                    element.classList.add("in");
+                }
+            });
+        } catch (_) {}
+    };
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(document.documentElement);
+    resizeObserver.observe(document.body);
+    const mutationObserver = new MutationObserver(() => {
+        updateHeight();
+        revealParentViewport();
+    });
+    mutationObserver.observe(document.body, {childList: true, characterData: true, subtree: true});
+    window.addEventListener("load", updateHeight);
+    document.addEventListener("load", updateHeight, true);
+    document.fonts?.ready.then(updateHeight);
     window.addEventListener("resize", updateHeight);
+    try { window.parent.addEventListener("scroll", revealParentViewport, {passive: true}); } catch (_) {}
     window.addEventListener("hashchange", () => {
         updateHeight();
-        try {
-            window.parent.scrollTo(0, 0);
-        } catch (_) {}
+        try { window.parent.scrollTo(0, 0); } catch (_) {}
+        requestAnimationFrame(revealParentViewport);
     });
   send("streamlit:componentReady", {apiVersion: 1});
     updateHeight();
@@ -175,15 +219,18 @@ def get_site_component():
         '<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;1,400;1,500'
         '&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">'
     )
+    stylesheet = (ROOT / "css" / "style.css").read_text(encoding="utf-8")
+    for viewport_unit in ("100vh", "78vh", "70vh", "62vh"):
+        stylesheet = stylesheet.replace(viewport_unit, f"var(--streamlit-{viewport_unit})")
     html = html.replace(
         '<link rel="stylesheet" href="css/style.css">',
-        fonts + '<link rel="stylesheet" href="css/style.css">',
+        fonts + f"<style>{stylesheet}</style>",
     )
     html = html.replace(
         "</head>",
         """<style>
         html, body {overflow-y:auto!important;overscroll-behavior:contain}
-        body {min-height:100vh;display:flex;flex-direction:column}
+        body {min-height:var(--streamlit-100vh);display:flex;flex-direction:column}
         body > main {flex:1 0 auto}
         body > footer {flex:0 0 auto;margin-top:auto}
         </style></head>""",
