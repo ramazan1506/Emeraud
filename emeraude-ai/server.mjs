@@ -186,5 +186,32 @@ const server = createServer(async (request, response) => {
   return handleStatic(pathname, response, request.method);
 });
 
-const port = Number(process.env.PORT) || 3000;
-server.listen(port, HOST, () => console.log(`Émeraude AI слушает порт ${port}`));
+const startPort = Number(process.env.PORT) || 3000;
+const portCandidates = Array.from({length: 20}, (_, index) => startPort + index);
+let portIndex = 0;
+
+function listenNext() {
+  const port = portCandidates[portIndex];
+  if (!port) {
+    console.error(`Не удалось найти свободный порт среди ${portCandidates.length} вариантов.`);
+    process.exit(1);
+    return;
+  }
+
+  server.once('error', error => {
+    if (error.code === 'EADDRINUSE') {
+      portIndex += 1;
+      console.warn(`Порт ${port} занят, пробую ${portCandidates[portIndex]}.`);
+      setImmediate(listenNext);
+      return;
+    }
+    console.error('Не удалось запустить сервер:', error);
+    process.exit(1);
+  });
+
+  server.listen(port, HOST, () => {
+    console.log(`Émeraude AI слушает порт ${port}`);
+  });
+}
+
+listenNext();
