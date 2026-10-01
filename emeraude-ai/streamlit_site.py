@@ -199,17 +199,17 @@ def get_site_component():
         '<link rel="stylesheet" href="css/style.css">',
         fonts + '<link rel="stylesheet" href="css/style.css">',
     )
-        html = html.replace(
-                "</head>",
-                """<style>
-                body {min-height:100vh;display:flex;flex-direction:column}
-                body > main {flex:1 0 auto}
-                body > footer {flex:0 0 auto;margin-top:auto}
-                #home .scroll-reveal,
-                #home .scroll-reveal.is-visible {opacity:1!important;transform:none!important}
-                .rvc {clip-path:none!important}
-                </style></head>""",
-        )
+    html = html.replace(
+        "</head>",
+        """<style>
+        body {min-height:100vh;display:flex;flex-direction:column}
+        body > main {flex:1 0 auto}
+        body > footer {flex:0 0 auto;margin-top:auto}
+        #home .scroll-reveal,
+        #home .scroll-reveal.is-visible {opacity:1!important;transform:none!important}
+        .rvc {clip-path:none!important}
+        </style></head>""",
+    )
     html = html.replace(
         '<script src="js/ai.js"></script>',
         f"<script>{STREAMLIT_BRIDGE}</script><script src=\"js/ai.js\"></script>",
