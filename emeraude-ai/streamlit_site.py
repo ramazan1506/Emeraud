@@ -18,6 +18,7 @@ SYSTEM_INSTRUCTION = (
 )
 STREAMLIT_BRIDGE = r"""
 (() => {
+    window.__EMERAUDE_STREAMLIT__ = true;
   const pending = new Map();
   const send = (type, payload = {}) => window.parent.postMessage({
     isStreamlitMessage: true,
@@ -114,16 +115,15 @@ STREAMLIT_BRIDGE = r"""
         try {
             const frameTop = window.frameElement.getBoundingClientRect().top;
             const viewportHeight = window.parent.innerHeight;
-            document.querySelectorAll("#home .scroll-reveal:not(.is-visible)").forEach(element => {
+            document.querySelectorAll("#home .scroll-reveal:not(.is-visible), .rvc:not(.in), [data-n]:not([data-counted])").forEach(element => {
                 const bounds = element.getBoundingClientRect();
                 if (frameTop + bounds.top < viewportHeight * 0.9 && frameTop + bounds.bottom > 0) {
-                    element.classList.add("is-visible");
-                }
-            });
-            document.querySelectorAll(".rvc:not(.in)").forEach(element => {
-                const bounds = element.getBoundingClientRect();
-                if (frameTop + bounds.top < viewportHeight && frameTop + bounds.bottom > 0) {
-                    element.classList.add("in");
+                    if (element.matches("#home .scroll-reveal")) element.classList.add("is-visible");
+                    if (typeof window.__emeraudeRevealElement === "function") {
+                        window.__emeraudeRevealElement(element);
+                    } else {
+                        element.classList.add("in");
+                    }
                 }
             });
         } catch (_) {}
@@ -183,20 +183,9 @@ STREAMLIT_BRIDGE = r"""
         if (forwarded) event.preventDefault();
     }, {passive: false});
     resizeObserver.observe(document.body);
-    const revealStreamlitContent = () => {
-        requestAnimationFrame(() => {
-            document.querySelectorAll("#home .scroll-reveal:not(.is-visible)").forEach(element => {
-                element.classList.add("is-visible");
-            });
-            document.querySelectorAll(".rvc:not(.in)").forEach(element => {
-                element.classList.add("in");
-            });
-        });
-    };
     const mutationObserver = new MutationObserver(() => {
         updateHeight();
         revealParentViewport();
-        revealStreamlitContent();
     });
     mutationObserver.observe(document.body, {
         attributes: true,
