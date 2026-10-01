@@ -48,10 +48,16 @@ STREAMLIT_BRIDGE = r"""
     const getParentScroller = () => {
         try {
             const parentDocument = window.parent.document;
-            const streamlitContainer = parentDocument.querySelector('[data-testid="stAppViewContainer"]');
-            if (streamlitContainer && streamlitContainer.scrollHeight > streamlitContainer.clientHeight) {
-                return streamlitContainer;
+            let ancestor = window.frameElement?.parentElement;
+            while (ancestor && ancestor !== parentDocument.body && ancestor !== parentDocument.documentElement) {
+                const overflowY = window.parent.getComputedStyle(ancestor).overflowY;
+                if ((overflowY === "auto" || overflowY === "scroll") && ancestor.scrollHeight > ancestor.clientHeight + 1) {
+                    return ancestor;
+                }
+                ancestor = ancestor.parentElement;
             }
+            const streamlitMain = parentDocument.querySelector('[data-testid="stMain"]');
+            if (streamlitMain && streamlitMain.scrollHeight > streamlitMain.clientHeight + 1) return streamlitMain;
             const root = parentDocument.scrollingElement || parentDocument.documentElement;
             return root.scrollHeight > root.clientHeight ? root : null;
         } catch (_) {
@@ -175,9 +181,10 @@ STREAMLIT_BRIDGE = r"""
     document.addEventListener("load", updateHeight, true);
     document.fonts?.ready.then(updateHeight);
     window.addEventListener("resize", updateHeight);
-    const parentScroller = getParentScroller();
-    if (parentScroller) parentScroller.addEventListener("scroll", syncParentScroll, {passive: true});
-    try { window.parent.addEventListener("scroll", syncParentScroll, {passive: true}); } catch (_) {}
+    try {
+        window.parent.document.addEventListener("scroll", syncParentScroll, {passive: true, capture: true});
+        window.parent.addEventListener("scroll", syncParentScroll, {passive: true});
+    } catch (_) {}
     window.addEventListener("hashchange", () => {
         updateHeight();
         scrollParentToTop();
