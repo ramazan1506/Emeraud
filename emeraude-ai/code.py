@@ -1,7 +1,8 @@
-import streamlit as st
+import os
 
-# Загрузка и отображение HTML-файла
-with open("index.html", "r", encoding="utf-8") as f:
-    html_content = f.read()
+# Получаем путь к директории, в которой находится текущий файл code.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+html_path = os.path.join(BASE_DIR, "index.html")
 
-st.components.v1.html(html_content, height=800, scrolling=True)
+with open(html_path, "r", encoding="utf-8") as f:
+    # ваш код
