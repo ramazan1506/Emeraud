@@ -50,8 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const mq = $('#mq'); if (mq) mq.innerHTML = 'Maison Margiela,Rick Owens,Prada,Chrome Hearts,Yohji Yamamoto,Ann Demeulemeester'.split(',').map(b => `<span>${b}</span>`).join('').repeat(3);
   const newWrap = $('#new'); if (newWrap) newWrap.innerHTML = list([
     ['Jasonwood','Осеннее пальто','assets/1790775475607.jpg'],
-    ['Maison Margiela','Изумрудная водолазка','assets/Снимок экрана 2026-09-30 191733.png'],
-    ['Tiffany & Co.','Золотая цепь','assets/Снимок экрана 2026-09-30 191859.png']
+    ['Maison Margiela','Изумрудная водолазка','assets/emerald-turtleneck.png'],
+    ['Tiffany & Co.','Золотая цепь','assets/gold-chain.png']
   ],
     ([b, t, img], i) => `<a class="pc" href="#chat" style="--reveal-delay:${i * 100}ms" data-p="Образ с вещью «${t}» в духе ${b}">${art(i, '', img)}<small>в духе ${b}</small><h3>${t}</h3></a>`);
   const revealImage = img => requestAnimationFrame(() => img.classList.add('is-loaded'));

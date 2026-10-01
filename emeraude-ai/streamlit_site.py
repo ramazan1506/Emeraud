@@ -130,13 +130,18 @@ STREAMLIT_BRIDGE = r"""
     };
     const resizeObserver = new ResizeObserver(updateHeight);
     resizeObserver.observe(document.documentElement);
+    let scrollSyncFrame = 0;
     const syncParentScroll = () => {
-        try {
-            const scroller = getParentScroller();
-            const scrollTop = scroller?.scrollTop || window.parent.scrollY || 0;
-            document.documentElement.style.setProperty("--sy", scrollTop);
-            revealParentViewport();
-        } catch (_) {}
+        if (scrollSyncFrame) return;
+        scrollSyncFrame = requestAnimationFrame(() => {
+            scrollSyncFrame = 0;
+            try {
+                const scroller = getParentScroller();
+                const scrollTop = scroller ? scroller.scrollTop : (window.parent.scrollY || 0);
+                document.documentElement.style.setProperty("--sy", scrollTop);
+                revealParentViewport();
+            } catch (_) {}
+        });
     };
     const listenedScrollTargets = new WeakSet();
     const bindParentScrollListeners = () => {
@@ -157,6 +162,10 @@ STREAMLIT_BRIDGE = r"""
             listen(window.parent);
         } catch (_) {}
     };
+    try {
+        const parentObserver = new MutationObserver(bindParentScrollListeners);
+        parentObserver.observe(window.parent.document.body, {childList: true, subtree: true});
+    } catch (_) {}
     document.addEventListener("wheel", event => {
         const track = event.target.closest?.(".track");
         if (track) {
