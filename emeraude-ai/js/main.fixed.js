@@ -21,7 +21,7 @@ const art = (i, x = '', src = '') => {
 const list = (a, f) => Array.isArray(a) ? a.map(f).join('') : '';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const V = ['about','home','chat','wardrobe'];
+  const V = ['about','home','chat','wardrobe','auth'];
   const cnt = el => { const n = +el.dataset.n, t0 = performance.now(); (function f(t) { const p = Math.min((t - t0) / 1400, 1); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f) })(t0) };
   let io;
   const safeIo = () => {
@@ -38,7 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function show() {
     let v = location.hash.slice(1);
     if (!V.includes(v)) v = 'home';
+    const authenticated = Boolean(ls('ea_auth_user', null));
+    if (!authenticated && v !== 'auth') {
+      if (location.hash !== '#auth') location.hash = '#auth';
+      v = 'auth';
+    }
     V.forEach(x => { const el = $('#' + x); if (el) el.classList.toggle('on', x === v); });
+    $$('nav a[data-v]:not([data-v="auth"])').forEach(a => { a.hidden = !authenticated; });
     $$('nav a').forEach(a => a.classList.toggle('act', a.dataset.v === v));
     document.body.classList.remove('menu');
     scrollTo(0, 0);
@@ -84,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`);
   const vals = $('#vals'); if (vals) vals.innerHTML = list([['Стиль без стресса','Одежда помогает говорить о себе. Мы убираем тревогу выбора и оставляем удовольствие от образа.'],['ИИ только о моде','Консультант не отвлекается на посторонние темы: каждый ответ опирается на знания о стиле, сезоне и сочетаниях.'],['Стилист для каждого','Персональный совет, который раньше был привилегией, должен быть доступен в кармане.']],
     ([t, d]) => `<div><h3>${t}</h3><p>${d}</p></div>`);
-  const team = $('#team'); if (team) team.innerHTML = list([['Рамазан','Frontend Dev','Проектирует интерфейс и анимации, отвечает за адаптивность сайта и мобильной версии.'],['Медет','Frontend Dev','Верстает страницы, собирает дизайн-систему и следит за аккуратностью каждой детали.'],['Даниал','Speaker','Представляет проект аудитории, выстраивает питч и рассказывает историю продукта.'],['Ксения','Speaker','Отвечает за коммуникацию с пользователями, презентации и обратную связь по идее.']],
+  const team = $('#team'); if (team) team.innerHTML = list([['Рамазан','Founder & Lead Developer','Создаёт и ведёт проект целиком: формирует идею и продуктовую логику, разрабатывает сайт, подключает ИИ и отвечает за результат от первой концепции до работающего сервиса.'],['Медет','Frontend & UI Developer','Превращает идею в цельный пользовательский опыт: разрабатывает интерфейс, собирает визуальную систему, отвечает за адаптивность и аккуратность каждой детали.'],['Даниал','Product Presenter','Рассказывает о проекте и превращает его возможности в понятную историю: готовит презентации, выстраивает питч и представляет Émeraude AI аудитории.'],['Ксения','Community & Research','Собирает обратную связь, изучает потребности пользователей и помогает развивать продукт так, чтобы он решал реальные задачи выбора одежды.']],
     ([n, r, b]) => `<article class="tc gl"><div class="av">${n[0]}</div><h3>${n}</h3><span class="role">${r}</span><p>${b}</p></article>`);
   const road = $('#road'); if (road) road.innerHTML = list([['Этап 1','Идея','Заметили, что выбор одежды отнимает время, а универсальные ИИ дают размытые советы.'],['Этап 2','Прототип','Собрали сайт: генератор образов, консультант и цифровой гардероб.'],['Этап 3','ИИ-стилист','Подключаем языковую модель, ограниченную только миром моды.'],['Этап 4','Приложение','Выпускаем мобильную версию с камерой и примеркой вещей.']],
     ([s, t, d]) => `<div><small>${s}</small><h3>${t}</h3><p>${d}</p></div>`);
@@ -110,15 +116,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const ci = $('#ci');
     if (ci) ci.value = '';
     const ty = add('<span class="typing"><i></i><i></i><i></i></span>', 'b');
-    const a = await askAI(t, 'chat');
-    ty.remove();
-    add(esc(a), 'b');
+    try {
+      const answer = await askAI(t, 'chat');
+      add(esc(answer), 'b');
+    } catch (error) {
+      add(esc(error.message || 'Не удалось получить ответ. Попробуйте ещё раз.'), 'b');
+    } finally {
+      ty.remove();
+    }
   }
 
   add('Привет! Я ИИ-стилист Émeraude. Помогу с одеждой, цветами и образами. С чего начнём?', 'b');
   const cq = $('#cq'); if (cq) cq.innerHTML = chips(['Что надеть на свидание?','Как носить изумрудный цвет?','Образ на офис','Какое пальто на зиму?']);
-  const ci = $('#ci'); if (ci) ci.onkeydown = e => e.key === 'Enter' && send(e.target.value);
-  const cs = $('#cs'); if (cs) cs.onclick = () => send(ci ? ci.value : '');
+  const ci = $('#ci');
+  const chatForm = $('#chatForm');
+  if (chatForm) chatForm.onsubmit = e => {
+    e.preventDefault();
+    send(ci ? ci.value : '');
+  };
+
+  const authNav = $('#authNav');
+  const authStatus = $('#authStatus');
+  const loginForm = $('#loginForm');
+  const registerForm = $('#registerForm');
+  const loginTab = $('#loginTab');
+  const registerTab = $('#registerTab');
+  const authUserKey = 'ea_auth_user';
+  const authAccountKey = 'ea_auth_account';
+  const getAccount = () => ls(authAccountKey, null);
+  const hashPassword = async password => {
+    const bytes = new TextEncoder().encode(password);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  };
+  const setAuthStatus = message => { if (authStatus) authStatus.textContent = message; };
+  const showAuthForm = mode => {
+    const isLogin = mode === 'login';
+    if (loginForm) { loginForm.hidden = !isLogin; loginForm.style.display = isLogin ? 'grid' : 'none'; }
+    if (registerForm) { registerForm.hidden = isLogin; registerForm.style.display = isLogin ? 'none' : 'grid'; }
+    if (loginTab) { loginTab.classList.toggle('on', isLogin); loginTab.setAttribute('aria-selected', String(isLogin)); }
+    if (registerTab) { registerTab.classList.toggle('on', !isLogin); registerTab.setAttribute('aria-selected', String(!isLogin)); }
+    setAuthStatus('');
+  };
+  const updateAuthNav = () => {
+    const user = ls(authUserKey, null);
+    if (authNav) authNav.textContent = user ? 'Выйти' : 'Войти';
+    show();
+  };
+  if (authNav) authNav.onclick = e => {
+    if (!ls(authUserKey, null)) return;
+    e.preventDefault();
+    localStorage.removeItem(authUserKey);
+    updateAuthNav();
+    location.hash = '#auth';
+  };
+  if (loginTab) loginTab.onclick = () => showAuthForm('login');
+  if (registerTab) registerTab.onclick = () => showAuthForm('register');
+  if (loginForm) loginForm.onsubmit = async e => {
+    e.preventDefault();
+    const account = getAccount();
+    const email = $('#loginEmail').value.trim().toLowerCase();
+    const passwordHash = await hashPassword($('#loginPassword').value);
+    if (!account || account.email !== email || account.passwordHash !== passwordHash) {
+      setAuthStatus('Не нашли такой аккаунт. Проверьте email и пароль или зарегистрируйтесь.');
+      return;
+    }
+    sv(authUserKey, {name: account.name, email: account.email});
+    updateAuthNav();
+    loginForm.reset();
+    location.hash = '#home';
+  };
+  if (registerForm) registerForm.onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#registerName').value.trim();
+    const email = $('#registerEmail').value.trim().toLowerCase();
+    const password = $('#registerPassword').value;
+    const confirm = $('#registerConfirm').value;
+    if (password !== confirm) { setAuthStatus('Пароли не совпадают.'); return; }
+    if (getAccount()?.email === email) { setAuthStatus('Аккаунт с таким email уже существует.'); return; }
+    sv(authAccountKey, {name, email, passwordHash: await hashPassword(password)});
+    sv(authUserKey, {name, email});
+    updateAuthNav();
+    registerForm.reset();
+    setAuthStatus(`Аккаунт создан. Добро пожаловать, ${name}!`);
+  };
+  updateAuthNav();
 
   const CT = ['Все','Верх','Низ','Обувь','Аксессуары'];
   let W = ls('ea_w', [{n:'Чёрное пальто оверсайз',c:'Верх'},{n:'Изумрудная водолазка',c:'Верх'},{n:'Брюки цвета графит',c:'Низ'},{n:'Челси на массивной подошве',c:'Обувь'},{n:'Золотая цепь',c:'Аксессуары'},{n:'Кожаный ремень',c:'Аксессуары'}]), F = 'Все', pend = null;

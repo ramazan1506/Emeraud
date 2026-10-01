@@ -21,7 +21,8 @@
     <a href="#about" data-v="about">О нас</a>
     <a href="#home" data-v="home">Главная</a>
     <a href="#chat" data-v="chat">ИИ Консультант</a>
-    <a href="#wardrobe" data-v="wardrobe">Мой гардероб</a>
+    <a href="#wardrobe" data-v="wardrobe">Личный кабинет</a>
+    <a href="#auth" data-v="auth" id="authNav">Войти</a>
   </nav>
   <button class="bg" id="bg" aria-label="Меню"><span></span><span></span></button>
 </header>
@@ -48,9 +49,9 @@
 <section id="home" class="v">
   <div class="w hero">
     <div class="hx">
-      <h1><span class="ln"><i>Надень</i></span><span class="ln"><i class="gold-word">интеллект</i></span></h1>
+      <h1><span class="ln"><i>Твой стиль.</i></span><span class="ln"><i class="gold-word">Твой интеллект.</i></span></h1>
       <p class="lead">Опишите повод, погоду или настроение — ИИ-стилист соберёт образ в вашем духе. Он разговаривает только о моде.</p>
-      <div class="cta"><a class="btn gold" href="#chat">Спросить консультанта</a><a class="btn" href="#wardrobe">Мой гардероб</a></div>
+      <div class="cta"><a class="btn gold" href="#chat">Спросить консультанта</a><a class="btn" href="#wardrobe">Личный кабинет</a></div>
     </div>
     <div class="frame">
       <div class="art" style="--bgc:#052e22">
@@ -103,13 +104,43 @@
     <div class="ch"><div class="av">É</div><div><b>Stylist AI</b><small>в сети, отвечает только о моде</small></div></div>
     <div class="msgs" id="ms"></div>
     <div class="chips" id="cq" style="padding:0 14px 12px"></div>
-    <div class="bar"><input id="ci" placeholder="Напишите сообщение" autocomplete="off"><button class="snd" id="cs" aria-label="Отправить"><svg width="22" height="22"><use href="#pl"/></svg></button></div>
+    <form class="bar" id="chatForm"><input id="ci" placeholder="Напишите сообщение" autocomplete="off"><button class="snd" id="cs" type="submit" aria-label="Отправить"><svg width="22" height="22"><use href="#pl"/></svg></button></form>
+  </div>
+</div></section>
+
+<!-- ВХОД И РЕГИСТРАЦИЯ -->
+<section id="auth" class="v"><div class="w pg auth-page">
+  <div class="auth-intro">
+    <small>Émeraude AI / Личный кабинет</small>
+    <h1>Соберите стиль, который остаётся с вами.</h1>
+    <p class="lead">Войдите, чтобы сохранять подборки, вести гардероб и продолжать разговор со своим ИИ-стилистом.</p>
+  </div>
+  <div class="box auth-box">
+    <div class="auth-tabs" role="tablist" aria-label="Авторизация">
+      <button class="auth-tab on" id="loginTab" type="button" role="tab" aria-selected="true">Войти</button>
+      <button class="auth-tab" id="registerTab" type="button" role="tab" aria-selected="false">Регистрация</button>
+    </div>
+    <form id="loginForm" class="auth-form">
+      <label>Email<input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+      <label>Пароль<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Введите пароль" required minlength="6"></label>
+      <button class="btn gold" type="submit">Войти в кабинет</button>
+      <p class="auth-note">Данные этого демо хранятся только в браузере.</p>
+    </form>
+    <form id="registerForm" class="auth-form" hidden>
+      <label>Имя<input id="registerName" type="text" autocomplete="name" placeholder="Как к вам обращаться?" required></label>
+      <label>Email<input id="registerEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+      <label>Пароль<input id="registerPassword" type="password" autocomplete="new-password" placeholder="Минимум 6 символов" required minlength="6"></label>
+      <label>Повторите пароль<input id="registerConfirm" type="password" autocomplete="new-password" placeholder="Введите пароль ещё раз" required minlength="6"></label>
+      <button class="btn gold" type="submit">Зарегистрироваться</button>
+      <p class="auth-note">Это локальный прототип без базы данных и серверной авторизации.</p>
+    </form>
+    <p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
   </div>
 </div></section>
 
 <!-- МОЙ ГАРДЕРОБ -->
 <section id="wardrobe" class="v"><div class="w pg">
-  <h1>Мой гардероб</h1>
+  <h1>Личный кабинет</h1>
   <p class="lead" style="margin-bottom:34px">Добавляйте вещи с фото: карточка подстроится под любой размер снимка. Файл можно перетащить прямо на панель.</p>
   <div class="box wf">
     <input type="text" id="wn" placeholder="Название вещи, например «Чёрный бомбер»" aria-label="Название вещи">
@@ -127,7 +158,7 @@
 <footer>
   <div class="w fg">
     <div><a class="logo" href="#home">Émeraude<b>AI</b></a><p>ИИ-стилист, который говорит только о моде. Учебный проект, демо-версия.</p></div>
-    <div><h4>Разделы</h4><a href="#about">О нас</a><a href="#chat">ИИ Консультант</a><a href="#wardrobe">Мой гардероб</a></div>
+    <div><h4>Разделы</h4><a href="#about">О нас</a><a href="#chat">ИИ Консультант</a><a href="#wardrobe">Личный кабинет</a></div>
     <div><h4>Проект</h4><a href="#home">Коллекции</a><a href="#about">Команда</a><a href="#chat">Задать вопрос</a></div>
   </div>
   <div class="w fb"><span>© 2026 Émeraude AI</span><span>Сделано командой студентов</span></div>
