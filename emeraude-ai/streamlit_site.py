@@ -45,31 +45,13 @@ STREAMLIT_BRIDGE = r"""
     else request.resolve(response.result);
   });
 
-    let heightFrame = 0;
     const updateHeight = () => {
-        cancelAnimationFrame(heightFrame);
-        heightFrame = requestAnimationFrame(() => {
-            const height = Math.ceil(Math.max(
-                document.documentElement.scrollHeight,
-                document.body.scrollHeight,
-                document.documentElement.getBoundingClientRect().height,
-                document.body.getBoundingClientRect().height
-            ));
-            send("streamlit:setFrameHeight", {height});
-        });
+        let height = 900;
+        try {
+            height = window.parent.innerHeight || height;
+        } catch (_) {}
+        send("streamlit:setFrameHeight", {height: Math.max(480, Math.min(height, 1000))});
     };
-    const resizeObserver = new ResizeObserver(updateHeight);
-    resizeObserver.observe(document.documentElement);
-    resizeObserver.observe(document.body);
-    const mutationObserver = new MutationObserver(updateHeight);
-    mutationObserver.observe(document.documentElement, {
-        attributes: true,
-        childList: true,
-        characterData: true,
-        subtree: true
-    });
-    window.addEventListener("load", updateHeight);
-    document.addEventListener("load", updateHeight, true);
     window.addEventListener("resize", updateHeight);
     window.addEventListener("hashchange", () => {
         updateHeight();
@@ -77,8 +59,6 @@ STREAMLIT_BRIDGE = r"""
             window.parent.scrollTo(0, 0);
         } catch (_) {}
     });
-    if (document.fonts?.ready) document.fonts.ready.then(updateHeight);
-
   send("streamlit:componentReady", {apiVersion: 1});
     updateHeight();
 })();
@@ -202,12 +182,10 @@ def get_site_component():
     html = html.replace(
         "</head>",
         """<style>
+        html, body {overflow-y:auto!important;overscroll-behavior:contain}
         body {min-height:100vh;display:flex;flex-direction:column}
         body > main {flex:1 0 auto}
         body > footer {flex:0 0 auto;margin-top:auto}
-        #home .scroll-reveal,
-        #home .scroll-reveal.is-visible {opacity:1!important;transform:none!important}
-        .rvc {clip-path:none!important}
         </style></head>""",
     )
     html = html.replace(
