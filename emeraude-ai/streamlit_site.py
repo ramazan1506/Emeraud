@@ -81,7 +81,7 @@ STREAMLIT_BRIDGE = r"""
     const scrollParentToTop = () => {
         const scroller = getParentScroller();
         if (scroller) {
-            scroller.scrollTo({top: 0, behavior: "smooth"});
+            scroller.scrollTo({top: 0, behavior: "auto"});
             return;
         }
         try { window.parent.scrollTo(0, 0); } catch (_) {}
@@ -174,7 +174,7 @@ STREAMLIT_BRIDGE = r"""
             const atStart = track.scrollLeft <= 0 && delta < 0;
             const atEnd = track.scrollLeft >= maxScroll - 1 && delta > 0;
             if (maxScroll > 0 && !atStart && !atEnd) {
-                track.scrollBy({left: delta, behavior: "smooth"});
+                track.scrollBy({left: delta, behavior: "auto"});
                 event.preventDefault();
                 return;
             }
